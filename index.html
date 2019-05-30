@@ -83,11 +83,14 @@
       width: 100%;
       z-index: 1;
       opacity: 0;
-      transition: opacity 0.5s;
+	  visibility: hidden;
+      transition: visibility 0s 0.5s, opacity 0.5s ease;
     }
 
     .active-slide {
+	  visibility: visible;
       opacity: 1;
+	  transition: opacity 0.5s ease;
       z-index: 2;
     }
 
