@@ -1,0 +1,272 @@
+<html>
+
+<head>
+  <title>What kind of Somerville resident are you?</title>
+  <meta property="og:image" content="https://i.imgur.com/gCKnMtT.png" />
+  <!-- Modified version of code from https://www.sitepoint.com/simple-javascript-quiz/ -->
+  <style>
+    @import url(https://fonts.googleapis.com/css?family=Work+Sans:300,600);
+
+    body {
+      font-size: 20px;
+      font-family: 'Work Sans', sans-serif;
+      color: #333;
+      font-weight: 300;
+      text-align: center;
+      background-color: #f8f6f0;
+    }
+
+    h1 {
+      font-weight: 800;
+      margin: 0px;
+      padding: 10px;
+      font-size: 40px;
+      background-color: #444;
+      color: #fff;
+    }
+
+    .congrats {
+      font-weight: 800;
+      font-size: 35px;
+    }
+    
+    .question,
+    .resultsTitle {
+      font-size: 30px;
+      margin-bottom: 10px;
+    }
+
+    .resultsDescription {
+      margin-bottom: 20px;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .answers {
+      margin-bottom: 20px;
+      text-align: left;
+      display: inline-block;
+    }
+
+    .answers .labelinput {
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    button {
+      font-family: 'Work Sans', sans-serif;
+      font-size: 22px;
+      background-color: #279;
+      color: #fff;
+      border: 0px;
+      border-radius: 3px;
+      padding: 20px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      margin-left: 1px;
+      margin-right: 1px;
+    }
+
+    button:hover {
+      background-color: #38a;
+    }
+
+    input[type="checkbox"]:checked+label {
+      text-shadow: -0.06ex 0 black, 0.06ex 0 black;
+    }
+
+    .slide,
+    .resultsSlide {
+      position: absolute;
+      left: 0px;
+      top: 0px;
+      width: 100%;
+      z-index: 1;
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .active-slide {
+      opacity: 1;
+      z-index: 2;
+    }
+
+    .quiz-container {
+      position: relative;
+      height: 250px;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>What kind of Somerville resident are you?</h1>
+  <div class="quiz-container">
+    <div id="quiz"></div>
+    <div id="results" class="result"></div>
+  </div>
+  <script>
+    //(function() {
+
+    const myQuestions = [{
+      question: "What’s most important?",
+      answers: ["Bike lanes", "Parking", "Space for pedestrians", "Space for bus-only lanes"]
+    }, {
+      question: "Which is the best pizza?",
+      answers: ["Leones", "Mama Gina’s", "Dominos", "Market Basket \"More For Your Dollar\" Bake and Rise Cheese Pizza"]
+    }, {
+      question: "Which kind of pizza tastes better?",
+      answers: ["Sicilian", "Thin Crust", "Flatbread with pesto, corn, ch&egrave;vre and brie", "Any kind as long as it's cut into squares"]
+    }, {
+      question: "Which show is best?",
+      answers: ["Game of Thrones", "Stranger Things", "Black Mirror", "City Cable City Council Meetings", "Sunsetters in the Parks"]
+    }, {
+      question: "Which of the following have you ridden most in Somerville?",
+      answers: ["Adult-sized scooter", "Skateboard", "Taxi", "Car", "Kayak at Blessing of the Bay Boathouse", "Bus"]
+    }, {
+      question: "What plants do you have in or near your home?",
+      answers: ["Grape arbor", "Succulents", "Plastic Christmas Tree"]
+    }, {
+      question: "What term best describes you?",
+      answers: ["Barney", "Villen", "Hipster", "None of the above"]
+    }, {
+      question: "What is a Barney?",
+      answers: ["A children's TV show character", "An old hipster", "A barn animal"]
+    }, {
+      question: "Which team is best?",
+      answers: ["Celtics", "Bruins", "Red Sox", "Patriots", "Yankees", "Green Bay Packers", "Boston Closet Little League Champions (2011 & 2012)", "Somerville Pride Basketball"]
+    }, {
+      question: "What do you like to eat?",
+      answers: ["Pasta and sushi", "Indian curry and BBQ"]
+    }, {
+      question: "My best memories growing up include:",
+      answers: ["Playing with Somerville Rec and kids in parks all summer", "Playing Nintendo and Ms. Pac-Man", "Playing D&D in someone's basement",
+      "Bonfires at the lot where Capuano School is today", "Climbing the High Tower with friends", "The blizzard of 2015", "The blizzard of 1978"] 
+    }, {
+      question: "My opinion of the growing population of rats in the city is:",
+      answers: ["They are gross and creepy", "They are creepy and gross", "I try to think of them as squirrels with thin tails, but it doesn't work",
+      "I try to imagine I'm watching a nature documentary, but it doesn't work"]
+    }, {
+      question: "A good slogan for Somerville would be:",
+      answers: ["The Best Big Small Town", "A Place Where Neighbors are \"Close\"", "If You Get Lonely or Bored, Step Outside",
+      "A City of Squares", "80,000 Different Stories"]      
+    }];
+
+    const myResults = [{
+      title: "Thanks!",
+      description: "Click here to find out what kind of Somerville resident you are:",
+      button: "Okay"
+    }, {
+      title: "Almost there...",
+      description: "If you're ready for your results, click below:",
+      button: "Proceed"
+    }, {
+      title: "Drum roll please...",
+      description: "",
+      button: "Come on already"
+    }, {
+      title: "<span class=\"congrats\">CONGRATULATIONS!</span>",
+      description: "You are a SOMERVILLE resident (or part of the greater Somerville community) and you belong here!" +
+        "<br>(Now we just need to make sure you can afford to stay…)",
+      button: "Start over"
+    }];
+
+    function buildQuiz() {
+      // we'll need a place to store the HTML output
+      const output = [];
+
+      let radioIdNum = 0;
+      const answerLetters = "abcdefghijklmnopqrstuvwxyz";
+      // for each question...
+      myQuestions.forEach((currentQuestion, questionNumber) => {
+        // we'll want to store the list of answer choices
+        const answers = [];
+
+        // and for each available answer...
+        for (let i = 0; i < currentQuestion.answers.length; i++) {
+          // ...add an HTML radio button
+          answers.push('<div class="labelinput">' +
+            '<input type="checkbox" id="choice' + radioIdNum + '" name="question' + questionNumber + '" value="' + answerLetters.charAt(i) + '">' +
+            '<label for="choice' + radioIdNum + '"> ' + answerLetters.charAt(i) + ': ' + currentQuestion.answers[i] + '</label></div>'
+          );
+          radioIdNum++;
+        }
+
+        // add this question and its answers to the output
+        output.push(
+          '<div class="slide"><div class="question"> ' +
+          currentQuestion.question +
+          '</div><div class="answers"> ' +
+          answers.join("") + '</div>' + '<div>' + ((questionNumber > 0) ? '<button class="prev">Previous Question</button>' : '') +
+          ((questionNumber < myQuestions.length - 1) ? '<button class="next">Next Question</button>' : '<button class="submit">Submit Quiz</button>') +
+          '</div>' + '</div>'
+        );
+      });
+
+      // finally combine our output list into one string of HTML and put it on the page
+      quizElement.innerHTML = output.join("");
+
+      // add results
+
+      document.getElementById("results").innerHTML = myResults.map((result, index) =>
+        '<div class="resultsSlide" id="resultsSlide_' + index + '"><div class="resultsTitle">' + result.title +
+        '</div><div class="resultsDescription">' + result.description + '</div>' +
+        '<div><button class="resultsButton" id="resultsButton_' + index + '">' + result.button + '</button></div></div>'
+      ).join("");
+
+      document.querySelectorAll(".resultsButton").forEach(e => e.addEventListener("click", showNextResult));
+      document.querySelectorAll("button.next").forEach(e => e.addEventListener("click", showNextSlide));
+      document.querySelectorAll("button.prev").forEach(e => e.addEventListener("click", showPreviousSlide));
+      document.querySelectorAll("button.submit").forEach(e => e.addEventListener("click", showResults));
+    }
+
+    function showResults() {
+      slides.forEach(s => s.classList.remove("active-slide"));
+      document.querySelectorAll(".resultsSlide").forEach(s => s.classList.remove("active-slide"));
+      document.querySelector(".resultsSlide").classList.add("active-slide");
+    }
+
+    function showSlide(n) {
+      document.querySelectorAll(".resultsSlide").forEach(s => s.classList.remove("active-slide"));
+      slides.forEach(s => s.classList.remove("active-slide"));
+      slides[n].classList.add("active-slide");
+      currentSlide = n;
+    }
+
+    function showNextSlide() {
+      showSlide(currentSlide + 1);
+    }
+
+    function showPreviousSlide() {
+      showSlide(currentSlide - 1);
+    }
+
+    function showNextResult() {
+      document.querySelectorAll(".resultsSlide").forEach(s => s.classList.remove("active-slide"));
+      const nextId = "resultsSlide_" + (+(this.id.substring(this.id.indexOf("_") + 1)) + 1);
+      const nextElement = document.getElementById(nextId);
+      if (nextElement) {
+        nextElement.classList.add("active-slide");
+      } else {
+
+        showSlide(0);
+
+      }
+    }
+
+    const quizElement = document.getElementById("quiz");
+    const submitButton = document.getElementById("submit");
+
+    // display quiz right away
+    buildQuiz();
+
+    const slides = document.querySelectorAll(".slide");
+    let currentSlide = 0;
+    showSlide(0);
+
+    //})();
+  </script>
+</body>
+
+</html>
